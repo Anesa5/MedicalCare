@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Registration | Join MedicalCare</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== REGISTER PAGE SPECIFIC ===== */
+        .register-wrapper {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--lavender-color) 0%, #fff 100%);
+            padding: 40px 15px;
+        }
+
+        .register-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 30px rgba(0, 0, 82, 0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .register-top {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark-color));
+            color: #fff;
+            padding: 35px 40px;
+            text-align: center;
+        }
+
+        .register-top .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: inline-block;
+            color: #fff;
+        }
+
+        .register-top h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .register-top p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Progress Steps */
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 25px 40px;
+            background: var(--light-gray);
+            position: relative;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step .circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid var(--light-gray);
+            color: var(--muted-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+            transition: 0.3s;
+        }
+
+        .progress-step.active .circle {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .progress-step span {
+            font-size: 12px;
+            color: var(--muted-color);
+            font-weight: 500;
+        }
+
+        .progress-step.active span {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* Form Body */
+        .register-body {
+            padding: 35px 40px 40px;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+        }
+
+        .form-section h2 {
+            font-size: 17px;
+            color: var(--primary-dark-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--lavender-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13.6px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--primary-dark-color);
+        }
+
+        .form-group label .required {
+            color: #d32f2f;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-family: var(--font-family);
+            font-size: 13.6px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 65, 130, 0.08);
+        }
+
+        .form-group .hint {
+            font-size: 11.5px;
+            color: var(--muted-color);
+            margin-top: 5px;
+            display: block;
+        }
+
+        .form-group .error {
+            font-size: 11.5px;
+            color: #d32f2f;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* File upload */
+        .file-upload {
+            border: 2px dashed var(--light-gray);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background: #fafbfc;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+            background: var(--lavender-color);
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-upload .upload-icon {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .file-upload p {
+            font-size: 13.6px;
+            color: var(--dark-color);
+            margin-bottom: 4px;
+        }
+
+        .file-upload small {
+            font-size: 11.5px;
+            color: var(--muted-color);
+        }
+
+        .file-upload.has-file {
+            border-color: var(--primary-color);
+            background: var(--lavender-color);
+        }
+
+        /* Terms */
+        .terms-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 25px;
+            font-size: 13.6px;
+            color: var(--muted-color);
+            line-height: 1.5;
+        }
+
+        .terms-check input {
+            margin-top: 3px;
+            width: auto;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .terms-check a {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* Submit Button */
+        .btn-register {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: var(--font-family);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-register:hover {
+            background: var(--primary-dark-color);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 82, 0.2);
+        }
+
+        .btn-register:disabled {
+            background: #6b8db8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Footer link */
+        .login-link-box {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 13.6px;
+            color: var(--muted-color);
+        }
+
+        .login-link-box a {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .login-link-box a:hover {
+            text-decoration: underline;
+        }
+
+        /* Benefits sidebar (optional, hidden on mobile) */
+        .register-info {
+            padding: 35px 40px;
+            background: #f8f9fc;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        .register-info h3 {
+            font-size: 15px;
+            color: var(--primary-dark-color);
+            margin-bottom: 15px;
+        }
+
+        .benefits-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13.6px;
+            color: var(--muted-color);
+        }
+
+        .benefit-item .b-icon {
+            color: var(--primary-color);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .benefit-item strong {
+            color: var(--primary-dark-color);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* Success message */
+        .success-msg {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-msg.show {
+            display: block;
+        }
+
+        .success-msg .check {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .success-msg h2 {
+            font-size: 22px;
+            color: var(--primary-dark-color);
+            margin-bottom: 10px;
+        }
+
+        .success-msg p {
+            font-size: 14px;
+            color: var(--muted-color);
+            margin-bottom: 25px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+
+            .register-body,
+            .register-top,
+            .progress-bar,
+            .register-info {
+                padding: 25px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .benefits-list {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-step span {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">MedicalCare</a>
+            <ul class="nav-links">
+                <li><a href="doctors.html">Find Doctors</a></li>
+                <li><a href="hospitals.html">Hospitals</a></li>
+                <li><a href="lab-tests.html">Lab Tests</a></li>
+                <li><a href="register.html" class="active">For Doctors</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="login.html" class="login-link">Login</a>
+                <a href="signup.html" class="btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- REGISTER WRAPPER -->
+    <div class="register-wrapper">
+        <div class="register-container">
+
+            <!-- HEADER -->
+            <div class="register-top">
+                <span class="logo-text">MedicalCare</span>
+                <h1>Join as a Doctor</h1>
+                <p>Grow your practice digitally with millions of patients</p>
+            </div>
+
+            <!-- PROGRESS BAR -->
+            <div class="progress-bar">
+                <div class="progress-step active">
+                    <div class="circle">1</div>
+                    <span>Account</span>
+                </div>
+                <div class="progress-step active">
+                    <div class="circle">2</div>
+                    <span>Professional</span>
+                </div>
+                <div class="progress-step active">
+                    <div class="circle">3</div>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+            <!-- FORM BODY -->
+            <div class="register-body" id="formBody">
+                <form id="doctorRegisterForm">
+
+                    <!-- SECTION 1: Account Info -->
+                    <div class="form-section">
+                        <h2>👤 Account Information</h2>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name <span class="required">*</span></label>
+                                <input type="text" id="name" name="name" placeholder="e.g., Ahmed Khan" required>
+                            </div>
+                            <div class="form-group">
+                                <label>CNIC <span class="required">*</span></label>
+                                <input type="text" id="cnic" name="cnic" placeholder="e.g., 3520212345678"
+                                    maxlength="13" required>
+                                <span class="error" id="cnicError"></span>
+                                <span class="hint">13 digits, without dashes</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email Address <span class="required">*</span></label>
+                                <input type="email" id="email" name="email" placeholder="doctor@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password <span class="required">*</span></label>
+                                <input type="password" id="password" name="password" placeholder="Min. 8 characters"
+                                    autocomplete="new-password" required>
+                                <span class="hint">Uppercase, lowercase, number & special char</span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Confirm Password <span class="required">*</span></label>
+                                <input type="password" id="confirmPassword" name="confirmPassword"
+                                    placeholder="Re-enter password" autocomplete="new-password" required>
+                                <span class="error" id="confirmError"></span>
+                            </div>
+                            <div class="form-group"></div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: Professional Details -->
+                    <div class="form-section">
+                        <h2>🩺 Professional Details</h2>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Specialty <span class="required">*</span></label>
+                                <select id="specialty" name="specialty" required>
+                                    <option value="">Select Specialty</option>
+                                    <option>Cardiologist</option>
+                                    <option>Dermatologist</option>
+                                    <option>Dentist</option>
+                                    <option>General Physician</option>
+                                    <option>Gynecologist</option>
+                                    <option>Neurologist</option>
+                                    <option>Orthopedic Surgeon</option>
+                                    <option>Pediatrician</option>
+                                    <option>Psychiatrist</option>
+                                    <option>ENT Specialist</option>
+                                    <option>Eye Specialist</option>
+                                    <option>Urologist</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Years of Experience <span class="required">*</span></label>
+                                <input type="number" id="experience" name="experience" min="0" max="60"
+                                    placeholder="e.g., 5" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>License Type <span class="required">*</span></label>
+                                <input type="text" id="licenseType" name="licenseType" placeholder="e.g., PMDC"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label>License Number <span class="required">*</span></label>
+                                <input type="text" id="licenseNumber" name="licenseNumber"
+                                    placeholder="Enter license number" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Hospital / Clinic Name <span class="required">*</span></label>
+                                <input type="text" id="hospital" name="hospital" placeholder="e.g., Aga Khan Hospital"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label>City <span class="required">*</span></label>
+                                <select id="city" name="city" required>
+                                    <option value="">Select City</option>
+                                    <option>Karachi</option>
+                                    <option>Lahore</option>
+                                    <option>Islamabad</option>
+                                    <option>Rawalpindi</option>
+                                    <option>Faisalabad</option>
+                                    <option>Multan</option>
+                                    <option>Peshawar</option>
+                                    <option>Quetta</option>
+                                    <option>Hyderabad</option>
+                                    <option>Sialkot</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group full">
+                                <label>Consultation Fee (Rs.) <span class="required">*</span></label>
+                                <input type="number" id="fee" name="fee" min="0" placeholder="e.g., 2000" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2.5: Availability -->
+                    <div class="form-section">
+                        <h2>🕐 Available Timings</h2>
+                        <p style="font-size:12.5px; color:#46484B; margin-bottom:15px;">
+                            Un time slots ko select karein jab aap patients ko dekh sakte hain.
+                        </p>
+
+                        <div class="slots-select-grid" id="slotsGrid">
+                            <!-- Slots JS se generate honge -->
+                        </div>
+
+                        <div class="form-group" style="margin-top:15px;">
+                            <label>Ya Custom Slot Add Karein</label>
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" id="customSlot" placeholder="e.g., 9:00 PM"
+                                    style="flex:1; padding:11px 14px; border:1px solid #EFF0F2; border-radius:8px; font-family:inherit; font-size:13.6px;">
+                                <button type="button" onclick="addCustomSlot()"
+                                    style="padding:0 20px; background:#004182; color:#fff; border:none; border-radius:8px; font-family:inherit; font-size:13.5px; font-weight:600; cursor:pointer;">Add</button>
+                            </div>
+                            <small class="hint" id="customSlotsList" style="display:block; margin-top:8px;"></small>
+                        </div>
+                    </div>
+
+                    <style>
+                        .slots-select-grid {
+                            display: grid;
+                            grid-template-columns: repeat(4, 1fr);
+                            gap: 10px;
+                        }
+
+                        .slot-option {
+                            padding: 10px;
+                            text-align: center;
+                            border: 1px solid #EFF0F2;
+                            border-radius: 8px;
+                            font-size: 13px;
+                            font-family: inherit;
+                            cursor: pointer;
+                            transition: 0.2s;
+                            background: #fff;
+                        }
+
+                        .slot-option:hover {
+                            border-color: #004182;
+                            color: #004182;
+                        }
+
+                        .slot-option.selected {
+                            background: #004182;
+                            color: #fff;
+                            border-color: #004182;
+                        }
+
+                        @media (max-width: 600px) {
+                            .slots-select-grid {
+                                grid-template-columns: repeat(2, 1fr);
+                            }
+                        }
+                    </style>
+
+                    <!-- SECTION 3: Documents -->
+                    <div class="form-section">
+                        <h2>📄 Document Upload</h2>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Medical License <span class="required">*</span></label>
+                                <label class="file-upload" for="licenseFile" id="licenseUploadBox">
+                                    <input type="file" id="licenseFile" name="licenseFile" accept=".pdf,.jpg,.jpeg,.png"
+                                        required>
+                                    <div class="upload-icon">📎</div>
+                                    <p id="licenseFileName">Click to upload license</p>
+                                    <small>PDF, JPG, or PNG (max 5MB)</small>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>CNIC Front <span class="required">*</span></label>
+                                <label class="file-upload" for="cnicFile" id="cnicUploadBox">
+                                    <input type="file" id="cnicFile" name="cnicFile" accept=".pdf,.jpg,.jpeg,.png"
+                                        required>
+                                    <div class="upload-icon">🪪</div>
+                                    <p id="cnicFileName">Click to upload CNIC</p>
+                                    <small>PDF, JPG, or PNG (max 5MB)</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TERMS -->
+                    <label class="terms-check">
+                        <input type="checkbox" required>
+                        <span>I agree to MedicalCare's <a href="#">Terms of Service</a> and <a href="#">Privacy
+                                Policy</a>. I
+                            confirm that all information provided is accurate.</span>
+                    </label>
+
+                    <!-- SUBMIT -->
+                    <button type="submit" class="btn-register" id="submitBtn">
+                        Register as Doctor
+                    </button>
+
+                    <p class="login-link-box">
+                        Already have an account? <a href="login.html">Login here</a>
+                    </p>
+                </form>
+
+                <!-- SUCCESS MESSAGE (hidden initially) -->
+                <div class="success-msg" id="successMsg">
+                    <div class="check">✅</div>
+                    <h2>Registration Successful!</h2>
+                    <p>Aapka account ban gaya hai. Hamari team aapki documents verify karegi aur 24-48 hours mein aapko
+                        email milegi.</p>
+                    <a href="index.html" class="btn-primary" style="padding:12px 30px; display:inline-block;">
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+
+            <!-- BENEFITS SIDEBAR -->
+            <div class="register-info">
+                <h3>Why Join MedicalCare?</h3>
+                <div class="benefits-list">
+                    <div class="benefit-item">
+                        <span class="b-icon">✓</span>
+                        <div><strong>50M+ Patients</strong>Get discovered by millions</div>
+                    </div>
+                    <div class="benefit-item">
+                        <span class="b-icon">✓</span>
+                        <div><strong>Free Signup</strong>No hidden charges</div>
+                    </div>
+                    <div class="benefit-item">
+                        <span class="b-icon">✓</span>
+                        <div><strong>Verified Profile</strong>Build patient trust</div>
+                    </div>
+                    <div class="benefit-item">
+                        <span class="b-icon">✓</span>
+                        <div><strong>Smart Dashboard</strong>Manage appointments easily</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== JAVASCRIPT (Validation + File Upload + Backend) ===== -->
+    <script>
+        // ===== AVAILABILITY SLOTS (sabse pehle declare karna zaroori hai) =====
+        const defaultSlots = [
+            '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM',
+            '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
+            '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM',
+            '5:00 PM', '5:30 PM', '6:00 PM', '6:30 PM',
+            '7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM'
+        ];
+        let selectedSlots = [];
+        let customSlots = [];
+
+        function renderSlotsGrid() {
+            const grid = document.getElementById('slotsGrid');
+            if (!grid) return;
+            grid.innerHTML = defaultSlots.map(s => `
+                <div class="slot-option" data-slot="${s}">${s}</div>
+            `).join('');
+
+            grid.querySelectorAll('.slot-option').forEach(el => {
+                el.addEventListener('click', function () {
+                    const slot = this.dataset.slot;
+                    if (selectedSlots.includes(slot)) {
+                        selectedSlots = selectedSlots.filter(s => s !== slot);
+                        this.classList.remove('selected');
+                    } else {
+                        selectedSlots.push(slot);
+                        this.classList.add('selected');
+                    }
+                });
+            });
+        }
+
+        function addCustomSlot() {
+            const input = document.getElementById('customSlot');
+            const val = input.value.trim();
+            if (!val) return;
+            if (customSlots.includes(val)) {
+                alert('Ye slot already added hai.');
+                return;
+            }
+            customSlots.push(val);
+            input.value = '';
+            updateCustomList();
+        }
+
+        function updateCustomList() {
+            const el = document.getElementById('customSlotsList');
+            if (customSlots.length === 0) {
+                el.textContent = '';
+                return;
+            }
+            el.innerHTML = 'Custom slots: ' + customSlots.map(s =>
+                `<span style="display:inline-block; background:#E8F1FF; color:#004182; padding:3px 10px; border-radius:12px; margin:4px 4px 0 0;">${s}</span>`
+            ).join('');
+        }
+
+        renderSlotsGrid();
+
+        // ===== File Upload Display =====
+        function setupFileUpload(inputId, boxId, nameId) {
+            const input = document.getElementById(inputId);
+            const box = document.getElementById(boxId);
+            const nameEl = document.getElementById(nameId);
+            const defaultText = nameEl.textContent;
+
+            input.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    nameEl.textContent = '📎 ' + this.files[0].name;
+                    box.classList.add('has-file');
+                } else {
+                    nameEl.textContent = defaultText;
+                    box.classList.remove('has-file');
+                }
+            });
+        }
+
+        setupFileUpload('licenseFile', 'licenseUploadBox', 'licenseFileName');
+        setupFileUpload('cnicFile', 'cnicUploadBox', 'cnicFileName');
+
+        // ===== Form Validation =====
+        document.getElementById('doctorRegisterForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            let isValid = true;
+
+            // CNIC validation
+            const cnic = document.getElementById('cnic').value.trim();
+            const cnicError = document.getElementById('cnicError');
+            if (!/^\d{13}$/.test(cnic)) {
+                cnicError.textContent = 'CNIC bilkul 13 digits ka hona chahiye (bina dashes).';
+                isValid = false;
+            } else {
+                cnicError.textContent = '';
+            }
+
+            // Password validation
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const confirmError = document.getElementById('confirmError');
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+
+            if (!passwordRegex.test(password)) {
+                alert('Password kam se kam 8 characters ka ho, jismein 1 Capital letter, 1 small letter, 1 number aur 1 special character ho.');
+                isValid = false;
+            }
+
+            if (password !== confirmPassword) {
+                confirmError.textContent = 'Passwords match nahi kar rahe.';
+                isValid = false;
+            } else {
+                confirmError.textContent = '';
+            }
+
+            // Slots validation: kam az kam 1 slot select zaroori hai
+            const allSlots = [...selectedSlots, ...customSlots];
+            if (allSlots.length === 0) {
+                alert('Kam se kam ek available time slot select karein.');
+                isValid = false;
+            }
+
+            // Agar validation fail ho gayi toh ruk jao
+            if (!isValid) return;
+
+            // ===== BACKEND CONNECTION =====
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+
+            // Button disable karein taake double submit na ho
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registering...';
+
+            // Form data bhejein
+            const formData = new FormData(this);
+
+            // ✅ Slots form data mein add karein (YEH NAYA HAI)
+            formData.append('availableSlots', JSON.stringify(allSlots));
+
+            fetch('http://localhost:5000/api/doctor/register', {
+                method: 'POST',
+                body: formData
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        // Success animation
+                        document.getElementById('doctorRegisterForm').style.display = 'none';
+                        document.querySelector('.progress-bar').style.display = 'none';
+                        document.getElementById('successMsg').classList.add('show');
+                    } else {
+                        alert('❌ Error: ' + data.message);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
+                })
+                .catch(err => {
+                    console.error('Fetch Error:', err);
+                    alert('❌ Server se connect nahi ho pa raha. Check karein ke backend chal raha hai (http://localhost:5000).');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                });
+        });
+    </script>
+
+</body>
+
+</html>

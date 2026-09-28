@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard | MedicalCare</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== AVAILABILITY SLOTS GRID ===== */
+        .slots-select-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .slot-option {
+            padding: 12px 10px;
+            text-align: center;
+            border: 1px solid #EFF0F2;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #fff;
+            color: #232426;
+        }
+
+        .slot-option:hover {
+            border-color: #004182;
+            color: #004182;
+        }
+
+        .slot-option.selected {
+            background: #004182;
+            color: #fff;
+            border-color: #004182;
+        }
+
+        @media (max-width: 600px) {
+            .slots-select-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LOGIN MODAL -->
+    <div class="auth-modal" id="loginModal">
+        <div class="auth-modal-box">
+            <h2>Doctor Login</h2>
+            <p>Apne account mein login karein</p>
+            <form id="doctorLoginForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="doctor@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn-action">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dash-wrapper" id="dashboard" style="display:none;">
+
+        <!-- SIDEBAR -->
+        <aside class="dash-sidebar">
+            <a href="index.html" class="dash-logo">MedicalCare</a>
+            <ul class="dash-menu">
+                <li><a href="#" class="active" data-tab="overview"><span
+                            class="menu-icon">📊</span><span>Overview</span></a></li>
+                <li><a href="#" data-tab="appointments"><span class="menu-icon">📅</span><span>Appointments</span></a>
+                </li>
+                <li><a href="#" data-tab="availability"><span class="menu-icon">🕐</span><span>Availability</span></a>
+                </li>
+                <li><a href="#" data-tab="profile"><span class="menu-icon">👤</span><span>My Profile</span></a></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="dash-main">
+            <div class="dash-header">
+                <div>
+                    <h1 id="pageTitle">Overview</h1>
+                    <p id="pageSub">Welcome back, <span id="docName">Doctor</span></p>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar" id="docAvatar">DR</div>
+                    <div class="user-details">
+                        <strong id="docNameTop">Doctor</strong>
+                        <span id="docSpecialty">Specialty</span>
+                    </div>
+                    <button class="btn-logout" onclick="logout()">Logout</button>
+                </div>
+            </div>
+
+            <!-- TAB: OVERVIEW -->
+            <div id="tab-overview" class="tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="statTotal">0</h3>
+                            <p>Total Appointments</p>
+                        </div>
+                        <div class="stat-icon icon-blue">📅</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="statPending">0</h3>
+                            <p>Pending</p>
+                        </div>
+                        <div class="stat-icon icon-yellow">⏳</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="statConfirmed">0</h3>
+                            <p>Confirmed</p>
+                        </div>
+                        <div class="stat-icon icon-green">✅</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="statCompleted">0</h3>
+                            <p>Completed</p>
+                        </div>
+                        <div class="stat-icon icon-pink">🏆</div>
+                    </div>
+                </div>
+
+                <div class="content-box">
+                    <h2>Recent Appointments</h2>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentAppointments">
+                                <tr>
+                                    <td colspan="4" class="loading">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: APPOINTMENTS -->
+            <div id="tab-appointments" class="tab-content" style="display:none;">
+                <div class="content-box">
+                    <h2>
+                        <span>All Appointments</span>
+                        <select id="filterStatus"
+                            style="padding:6px 12px; border:1px solid #EFF0F2; border-radius:6px; font-family:inherit; font-size:13px;">
+                            <option value="">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </h2>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Phone</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allAppointments">
+                                <tr>
+                                    <td colspan="6" class="loading">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: AVAILABILITY (NEW) -->
+            <div id="tab-availability" class="tab-content" style="display:none;">
+                <div class="content-box">
+                    <h2>Manage My Availability</h2>
+                    <p style="font-size:13.5px; color:#46484B; margin-bottom:15px;">
+                        Un time slots ko select karein jab aap patients ko dekh sakte hain.
+                    </p>
+                    <div class="slots-select-grid" id="docSlotsGrid"></div>
+                    <button class="btn-action" style="margin-top:18px; padding:12px 28px;"
+                        onclick="saveAvailability()">Save Changes</button>
+                </div>
+            </div>
+
+            <!-- TAB: PROFILE -->
+            <div id="tab-profile" class="tab-content" style="display:none;">
+                <div class="content-box">
+                    <h2>My Profile</h2>
+                    <div id="profileContent" class="loading">Loading...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+        let token = localStorage.getItem('doctorToken');
+        let doctorData = null;
+
+        // ===== INIT =====
+        window.addEventListener('DOMContentLoaded', () => {
+            if (token) {
+                loadDashboard();
+            } else {
+                document.getElementById('loginModal').classList.add('show');
+            }
+        });
+
+        // ===== LOGIN =====
+        document.getElementById('doctorLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const res = await fetch(`${API}/doctor/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('doctorToken', data.token);
+                    localStorage.setItem('doctorData', JSON.stringify(data.data));
+                    token = data.token;
+                    document.getElementById('loginModal').classList.remove('show');
+                    loadDashboard();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (err) {
+                alert('❌ Server se connect nahi ho pa raha. Backend chalayein.');
+            }
+        });
+
+        // ===== LOAD DASHBOARD =====
+        async function loadDashboard() {
+            doctorData = JSON.parse(localStorage.getItem('doctorData') || '{}');
+            document.getElementById('dashboard').style.display = 'flex';
+
+            // Set user info
+            const initials = (doctorData.name || 'DR').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            document.getElementById('docAvatar').textContent = initials;
+            document.getElementById('docName').textContent = doctorData.name || 'Doctor';
+            document.getElementById('docNameTop').textContent = 'Dr. ' + (doctorData.name || 'Doctor');
+            document.getElementById('docSpecialty').textContent = doctorData.specialty || '';
+
+            await loadAppointments();
+            await loadProfile();
+        }
+
+        // ===== LOAD APPOINTMENTS =====
+        async function loadAppointments() {
+            try {
+                const res = await fetch(`${API}/appointment/doctor`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (!data.success) throw new Error(data.message);
+
+                const apts = data.data || [];
+
+                // Stats
+                document.getElementById('statTotal').textContent = apts.length;
+                document.getElementById('statPending').textContent = apts.filter(a => a.status === 'Pending').length;
+                document.getElementById('statConfirmed').textContent = apts.filter(a => a.status === 'Confirmed').length;
+                document.getElementById('statCompleted').textContent = apts.filter(a => a.status === 'Completed').length;
+
+                // Recent (top 5)
+                const recent = apts.slice(0, 5);
+                const recentBody = document.getElementById('recentAppointments');
+                if (recent.length === 0) {
+                    recentBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:#46484B;">Koi appointment nahi hai.</td></tr>';
+                } else {
+                    recentBody.innerHTML = recent.map(a => `
+                        <tr>
+                            <td><strong>${a.patientName || 'N/A'}</strong></td>
+                            <td>${formatDate(a.appointmentDate)}</td>
+                            <td>${a.timeSlot}</td>
+                            <td><span class="badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+                // All appointments
+                renderAllAppointments(apts);
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('recentAppointments').innerHTML =
+                    '<tr><td colspan="4" style="text-align:center;padding:30px;color:#d32f2f;">Error: ' + err.message + '</td></tr>';
+            }
+        }
+
+        function renderAllAppointments(apts) {
+            const filter = document.getElementById('filterStatus').value;
+            const filtered = filter ? apts.filter(a => a.status === filter) : apts;
+            const body = document.getElementById('allAppointments');
+
+            if (filtered.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#46484B;">Koi appointment nahi mila.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = filtered.map(a => `
+                <tr>
+                    <td><strong>${a.patientName || 'N/A'}</strong></td>
+                    <td>${a.patientPhone || '-'}</td>
+                    <td>${formatDate(a.appointmentDate)}</td>
+                    <td>${a.timeSlot}</td>
+                    <td><span class="badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
+                    <td class="actions">
+                        ${a.status === 'Pending' ? `
+                            <button class="btn-sm btn-approve" onclick="updateStatus('${a._id}','Confirmed')">Confirm</button>
+                            <button class="btn-sm btn-reject" onclick="updateStatus('${a._id}','Cancelled')">Cancel</button>
+                        ` : a.status === 'Confirmed' ? `
+                            <button class="btn-sm btn-approve" onclick="updateStatus('${a._id}','Completed')">Complete</button>
+                        ` : '<span style="color:#999;">-</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ===== UPDATE STATUS =====
+        async function updateStatus(id, status) {
+            if (!confirm(`Kya aap is appointment ko "${status}" karna chahte hain?`)) return;
+
+            try {
+                const res = await fetch(`${API}/appointment/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('✅ Status update ho gaya: ' + status);
+                    loadAppointments();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (err) {
+                alert('❌ Server error');
+            }
+        }
+
+        // ===== LOAD PROFILE =====
+        async function loadProfile() {
+            try {
+                const res = await fetch(`${API}/doctor/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+
+                const d = data.data;
+                document.getElementById('profileContent').innerHTML = `
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+                        <div><strong>Name:</strong><br>${d.name}</div>
+                        <div><strong>Email:</strong><br>${d.email}</div>
+                        <div><strong>Specialty:</strong><br>${d.specialty}</div>
+                        <div><strong>Experience:</strong><br>${d.experience} years</div>
+                        <div><strong>License:</strong><br>${d.licenseType} - ${d.licenseNumber}</div>
+                        <div><strong>Hospital:</strong><br>${d.hospital}</div>
+                        <div><strong>City:</strong><br>${d.city}</div>
+                        <div><strong>Consultation Fee:</strong><br>Rs. ${d.fee}</div>
+                        <div><strong>Status:</strong><br><span class="badge badge-${d.status.toLowerCase()}">${d.status}</span></div>
+                        <div><strong>Rating:</strong><br>⭐ ${d.rating} (${d.totalReviews} reviews)</div>
+                    </div>
+                `;
+            } catch (err) {
+                document.getElementById('profileContent').innerHTML =
+                    '<p style="color:#d32f2f;">Error: ' + err.message + '</p>';
+            }
+        }
+
+        // ===== AVAILABILITY SLOTS =====
+        const defaultSlots = [
+            '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM',
+            '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM',
+            '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM',
+            '5:00 PM', '5:30 PM', '6:00 PM', '6:30 PM',
+            '7:00 PM', '7:30 PM', '8:00 PM', '8:30 PM'
+        ];
+        let doctorSelectedSlots = [];
+
+        async function loadAvailability() {
+            try {
+                const res = await fetch(`${API}/doctor/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    doctorSelectedSlots = data.data.availableSlots || [];
+                    renderDoctorSlotsGrid();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function renderDoctorSlotsGrid() {
+            const grid = document.getElementById('docSlotsGrid');
+            grid.innerHTML = defaultSlots.map(s => `
+                <div class="slot-option ${doctorSelectedSlots.includes(s) ? 'selected' : ''}" data-slot="${s}">${s}</div>
+            `).join('');
+
+            grid.querySelectorAll('.slot-option').forEach(el => {
+                el.addEventListener('click', function () {
+                    const slot = this.dataset.slot;
+                    if (doctorSelectedSlots.includes(slot)) {
+                        doctorSelectedSlots = doctorSelectedSlots.filter(s => s !== slot);
+                        this.classList.remove('selected');
+                    } else {
+                        doctorSelectedSlots.push(slot);
+                        this.classList.add('selected');
+                    }
+                });
+            });
+        }
+
+        async function saveAvailability() {
+            try {
+                const res = await fetch(`${API}/doctor/me`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ availableSlots: doctorSelectedSlots })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('✅ Availability save ho gayi!');
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (err) {
+                alert('❌ Server error');
+            }
+        }
+
+        // ===== FORMAT DATE =====
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        // ===== TABS =====
+        document.querySelectorAll('.dash-menu a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tab = link.dataset.tab;
+                if (!tab) return;
+
+                document.querySelectorAll('.dash-menu a').forEach(a => a.classList.remove('active'));
+                link.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+                document.getElementById('tab-' + tab).style.display = 'block';
+
+                const titles = {
+                    overview: 'Overview',
+                    appointments: 'All Appointments',
+                    availability: 'Manage Availability',
+                    profile: 'My Profile'
+                };
+                document.getElementById('pageTitle').textContent = titles[tab] || 'Dashboard';
+
+                // Availability tab open hone par data load karein
+                if (tab === 'availability') {
+                    loadAvailability();
+                }
+            });
+        });
+
+        document.getElementById('filterStatus').addEventListener('change', () => {
+            loadAppointments();
+        });
+
+        // ===== LOGOUT =====
+        function logout() {
+            localStorage.removeItem('doctorToken');
+            localStorage.removeItem('doctorData');
+            location.reload();
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments | MedicalCare</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- LOGIN MODAL -->
+    <div class="auth-modal" id="loginModal">
+        <div class="auth-modal-box">
+            <h2>Patient Login</h2>
+            <p>Apni appointments dekhne ke liye login karein</p>
+            <form id="patientLoginForm">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn-action">Login</button>
+                <p style="text-align:center; margin-top:15px; font-size:13px; color:#46484B;">
+                    Naya account? <a href="signup.html" style="color:#004182; font-weight:600;">Sign Up</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dash-wrapper" id="dashboard" style="display:none;">
+
+        <aside class="dash-sidebar">
+            <a href="index.html" class="dash-logo">MedicalCare</a>
+            <ul class="dash-menu">
+                <li><a href="#" class="active" data-tab="overview"><span class="menu-icon">📊</span><span>My
+                            Appointments</span></a></li>
+                <li><a href="#" data-tab="profile"><span class="menu-icon">👤</span><span>My Profile</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="dash-main">
+            <div class="dash-header">
+                <div>
+                    <h1 id="pageTitle">My Appointments</h1>
+                    <p>Welcome back, <span id="patName">Patient</span></p>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar" id="patAvatar">PT</div>
+                    <div class="user-details">
+                        <strong id="patNameTop">Patient</strong>
+                        <span id="patEmail">email@example.com</span>
+                    </div>
+                    <button class="btn-logout" onclick="logout()">Logout</button>
+                </div>
+            </div>
+
+            <!-- TAB: OVERVIEW -->
+            <div id="tab-overview" class="tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="statTotal">0</h3>
+                            <p>Total Appointments</p>
+                        </div>
+                        <div class="stat-icon icon-blue">📅</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="statUpcoming">0</h3>
+                            <p>Upcoming</p>
+                        </div>
+                        <div class="stat-icon icon-yellow">⏳</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="statCompleted">0</h3>
+                            <p>Completed</p>
+                        </div>
+                        <div class="stat-icon icon-green">✅</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="statCancelled">0</h3>
+                            <p>Cancelled</p>
+                        </div>
+                        <div class="stat-icon icon-pink">❌</div>
+                    </div>
+                </div>
+
+                <div class="content-box">
+                    <h2>
+                        <span>My Appointments</span>
+                        <a href="doctors.html" class="btn-action" style="font-size:13px; padding:8px 16px;">+ Book
+                            New</a>
+                    </h2>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Doctor</th>
+                                    <th>Specialty</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Fee</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentsBody">
+                                <tr>
+                                    <td colspan="7" class="loading">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: PROFILE -->
+            <div id="tab-profile" class="tab-content" style="display:none;">
+                <div class="content-box">
+                    <h2>My Profile</h2>
+                    <div id="profileContent" class="loading">Loading...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+        let token = localStorage.getItem('patientToken');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (token) {
+                loadDashboard();
+            } else {
+                document.getElementById('loginModal').classList.add('show');
+            }
+        });
+
+        // ===== LOGIN =====
+        document.getElementById('patientLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const res = await fetch(`${API}/patient/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('patientToken', data.token);
+                    localStorage.setItem('patientData', JSON.stringify(data.data));
+                    token = data.token;
+                    document.getElementById('loginModal').classList.remove('show');
+                    loadDashboard();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (err) {
+                alert('❌ Server se connect nahi ho pa raha.');
+            }
+        });
+
+        // ===== LOAD DASHBOARD =====
+        async function loadDashboard() {
+            const patientData = JSON.parse(localStorage.getItem('patientData') || '{}');
+            document.getElementById('dashboard').style.display = 'flex';
+
+            const initials = (patientData.name || 'PT').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            document.getElementById('patAvatar').textContent = initials;
+            document.getElementById('patName').textContent = patientData.name || 'Patient';
+            document.getElementById('patNameTop').textContent = patientData.name || 'Patient';
+            document.getElementById('patEmail').textContent = patientData.email || '';
+
+            await loadAppointments();
+            await loadProfile();
+        }
+
+        // ===== LOAD APPOINTMENTS =====
+        async function loadAppointments() {
+            try {
+                const res = await fetch(`${API}/appointment/my`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (!data.success) throw new Error(data.message);
+
+                const apts = data.data || [];
+
+                document.getElementById('statTotal').textContent = apts.length;
+                document.getElementById('statUpcoming').textContent = apts.filter(a => a.status === 'Pending' || a.status === 'Confirmed').length;
+                document.getElementById('statCompleted').textContent = apts.filter(a => a.status === 'Completed').length;
+                document.getElementById('statCancelled').textContent = apts.filter(a => a.status === 'Cancelled').length;
+
+                const body = document.getElementById('appointmentsBody');
+                if (apts.length === 0) {
+                    body.innerHTML = `
+                        <tr><td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-icon">📅</div>
+                                <h3>Koi appointment nahi hai</h3>
+                                <p>Abhi tak aapne koi appointment book nahi ki.</p>
+                            </div>
+                        </td></tr>
+                    `;
+                    return;
+                }
+
+                body.innerHTML = apts.map(a => {
+                    const doc = a.doctor || {};
+                    return `
+                        <tr>
+                            <td><strong>Dr. ${doc.name || 'N/A'}</strong></td>
+                            <td>${doc.specialty || '-'}</td>
+                            <td>${formatDate(a.appointmentDate)}</td>
+                            <td>${a.timeSlot}</td>
+                            <td>Rs. ${a.fee || '-'}</td>
+                            <td><span class="badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
+                            <td class="actions">
+                                ${(a.status === 'Pending' || a.status === 'Confirmed') ?
+                            `<button class="btn-sm btn-reject" onclick="cancelAppointment('${a._id}')">Cancel</button>` :
+                            '<span style="color:#999;">-</span>'}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                document.getElementById('appointmentsBody').innerHTML =
+                    '<tr><td colspan="7" style="text-align:center;padding:30px;color:#d32f2f;">Error: ' + err.message + '</td></tr>';
+            }
+        }
+
+        // ===== CANCEL =====
+        async function cancelAppointment(id) {
+            if (!confirm('Kya aap ye appointment cancel karna chahte hain?')) return;
+
+            try {
+                const res = await fetch(`${API}/appointment/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('✅ Appointment cancel ho gayi.');
+                    loadAppointments();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (err) {
+                alert('❌ Server error');
+            }
+        }
+
+        // ===== PROFILE =====
+        async function loadProfile() {
+            try {
+                const res = await fetch(`${API}/patient/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.message);
+
+                const p = data.data;
+                document.getElementById('profileContent').innerHTML = `
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+                        <div><strong>Name:</strong><br>${p.name}</div>
+                        <div><strong>Email:</strong><br>${p.email}</div>
+                        <div><strong>Phone:</strong><br>${p.phone || '-'}</div>
+                        <div><strong>City:</strong><br>${p.city || '-'}</div>
+                        <div><strong>Gender:</strong><br>${p.gender || '-'}</div>
+                        <div><strong>Age:</strong><br>${p.age || '-'}</div>
+                    </div>
+                `;
+            } catch (err) {
+                document.getElementById('profileContent').innerHTML =
+                    '<p style="color:#d32f2f;">Error: ' + err.message + '</p>';
+            }
+        }
+
+        // ===== HELPERS =====
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        document.querySelectorAll('.dash-menu a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tab = link.dataset.tab;
+                if (!tab) return;
+
+                document.querySelectorAll('.dash-menu a').forEach(a => a.classList.remove('active'));
+                link.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+                document.getElementById('tab-' + tab).style.display = 'block';
+
+                const titles = { overview: 'My Appointments', profile: 'My Profile' };
+                document.getElementById('pageTitle').textContent = titles[tab];
+            });
+        });
+
+        function logout() {
+            localStorage.removeItem('patientToken');
+            localStorage.removeItem('patientData');
+            location.reload();
+        }
+    </script>
+
+</body>
+
+</html>

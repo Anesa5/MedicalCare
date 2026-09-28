@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment | MedicalCare</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .booking-page {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 15px;
+        }
+
+        .booking-steps {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .b-step {
+            font-size: 13.6px;
+            color: var(--muted-color);
+        }
+
+        .b-step.active {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .booking-form {
+            background: #fff;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            padding: 30px;
+        }
+
+        .booking-form h2 {
+            font-size: 20px;
+            color: var(--primary-dark-color);
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13.6px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-family: var(--font-family);
+            font-size: 13.6px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .time-slot {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 13.6px;
+            background: #fff;
+            font-family: var(--font-family);
+        }
+
+        .time-slot:hover,
+        .time-slot.selected {
+            border-color: var(--primary-color);
+            background: var(--lavender-color);
+            color: var(--primary-color);
+        }
+
+        .doctor-summary {
+            display: flex;
+            gap: 18px;
+            padding: 18px;
+            background: #F7F9FC;
+            border-radius: 10px;
+            margin-bottom: 26px;
+            align-items: center;
+        }
+
+        .doc-avatar-sm {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #E8F1FF, #C7D3E0);
+            color: #004182;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .doc-info-sm h3 {
+            font-size: 16px;
+            color: #000052;
+            margin-bottom: 4px;
+        }
+
+        .doc-info-sm p {
+            font-size: 13px;
+            color: #46484B;
+            margin-bottom: 2px;
+        }
+
+        .doc-info-sm .fee {
+            color: #004182;
+            font-weight: 700;
+            font-size: 14.5px;
+            margin-top: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #46484B;
+            font-size: 14px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #EFF0F2;
+            border-top-color: #004182;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .time-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .doctor-summary {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">MedicalCare</a>
+            <ul class="nav-links">
+                <li><a href="doctors.html">Find Doctors</a></li>
+                <li><a href="hospitals.html">Hospitals</a></li>
+                <li><a href="lab-tests.html">Lab Tests</a></li>
+                <li><a href="register.html">For Doctors</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="login.html" class="login-link">Login</a>
+                <a href="signup.html" class="btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1>Book Appointment</h1>
+        <p id="pageHeaderSub">Loading...</p>
+    </div>
+
+    <div class="booking-page">
+        <div class="booking-steps">
+            <span class="b-step active">1. Patient Details</span>
+            <span class="b-step">2. Payment</span>
+            <span class="b-step">3. Confirmation</span>
+        </div>
+
+        <!-- DYNAMIC BOOKING FORM -->
+        <div class="booking-form" id="bookingCard">
+            <div class="loading">
+                <div class="spinner"></div>
+                Loading...
+            </div>
+        </div>
+
+        <!-- SUCCESS SCREEN -->
+        <div class="booking-form" id="successScreen" style="display:none; text-align:center; padding:50px 30px;">
+            <div style="font-size:60px; margin-bottom:20px;">✅</div>
+            <h2 style="font-size:22px; color:#000052; margin-bottom:12px;">Appointment Confirmed!</h2>
+            <p style="font-size:14px; color:#46484B; margin-bottom:25px; line-height:1.6;">
+                Aapki appointment successfully book ho gayi hai.<br>
+                Confirmation details aapke phone number par bhej di jayengi.
+            </p>
+            <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                <a href="patient-dashboard.html"
+                    style="padding:12px 24px; background:#004182; color:#fff; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600;">View
+                    My Appointments</a>
+                <a href="index.html"
+                    style="padding:12px 24px; background:#fff; color:#004182; border:1px solid #004182; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600;">Back
+                    to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <h3>MedicalCare</h3>
+                <p>Pakistan's leading digital healthcare platform.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="doctors.html">Find Doctors</a></li>
+                </ul>
+            </div>
+        </div>
+        <p class="footer-bottom">© 2026 MedicalCare.com. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+        const params = new URLSearchParams(window.location.search);
+        const doctorId = params.get('doctorId');
+        const preselectedSlot = params.get('slot') || '';
+
+        let doctor = null;
+        let patient = null;
+        let token = localStorage.getItem('patientToken');
+        let selectedSlot = preselectedSlot;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!doctorId) {
+                alert('Doctor ID missing');
+                window.location.href = 'doctors.html';
+                return;
+            }
+            loadDoctor();
+        });
+
+        // ===== LOAD DOCTOR =====
+        async function loadDoctor() {
+            try {
+                const res = await fetch(`${API}/doctor/${doctorId}`);
+                const data = await res.json();
+
+                if (!data.success) throw new Error(data.message);
+
+                doctor = data.data;
+                await loadPatient();
+                renderBookingForm();
+            } catch (err) {
+                document.getElementById('bookingCard').innerHTML =
+                    '<p style="color:#d32f2f; text-align:center; padding:30px;">Error: ' + err.message + '</p>';
+            }
+        }
+
+        // ===== LOAD PATIENT (if logged in) =====
+        async function loadPatient() {
+            if (!token) return;
+            try {
+                const res = await fetch(`${API}/patient/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) patient = data.data;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // ===== RENDER BOOKING FORM =====
+        function renderBookingForm() {
+            const initials = (doctor.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            const slots = Array.isArray(doctor.availableSlots) ? doctor.availableSlots : [];
+
+            document.getElementById('pageHeaderSub').textContent =
+                `Dr. ${doctor.name} - ${doctor.specialty}`;
+
+            // Agar doctor ne slots set nahi kiye toh booking nahi ho sakti
+            if (slots.length === 0) {
+                document.getElementById('bookingCard').innerHTML = `
+                    <div class="doctor-summary">
+                        <div class="doc-avatar-sm">${initials}</div>
+                        <div class="doc-info-sm">
+                            <h3>Dr. ${doctor.name}</h3>
+                            <p>${doctor.specialty}</p>
+                            <p>📍 ${doctor.hospital}, ${doctor.city}</p>
+                            <p class="fee">Consultation Fee: Rs. ${doctor.fee}</p>
+                        </div>
+                    </div>
+                    <div style="text-align:center; padding:40px 20px;">
+                        <div style="font-size:50px; margin-bottom:15px; opacity:0.4;">📅</div>
+                        <h2 style="font-size:18px; color:#000052; margin-bottom:10px;">Timings Available Nahi</h2>
+                        <p style="font-size:13.5px; color:#46484B; line-height:1.6;">
+                            Is doctor ne abhi tak apni available timings set nahi ki.<br>
+                            Baraye meharbani kisi doosre doctor ko try karein.
+                        </p>
+                        <a href="doctors.html" style="display:inline-block; margin-top:20px; padding:12px 24px; background:#004182; color:#fff; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600;">Find Other Doctors</a>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('bookingCard').innerHTML = `
+                <div class="doctor-summary">
+                    <div class="doc-avatar-sm">${initials}</div>
+                    <div class="doc-info-sm">
+                        <h3>Dr. ${doctor.name}</h3>
+                        <p>${doctor.specialty}</p>
+                        <p>📍 ${doctor.hospital}, ${doctor.city}</p>
+                        <p class="fee">Consultation Fee: Rs. ${doctor.fee}</p>
+                    </div>
+                </div>
+
+                <h2>Patient Information</h2>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name <span style="color:#d32f2f;">*</span></label>
+                        <input type="text" id="patName" placeholder="Enter your name"
+                               value="${patient ? patient.name : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number <span style="color:#d32f2f;">*</span></label>
+                        <input type="tel" id="patPhone" placeholder="03XX-XXXXXXX"
+                               value="${patient ? patient.phone : ''}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email <span style="color:#d32f2f;">*</span></label>
+                        <input type="email" id="patEmail" placeholder="you@example.com"
+                               value="${patient ? patient.email : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select id="patGender">
+                            <option value="">Select</option>
+                            <option ${patient && patient.gender === 'Male' ? 'selected' : ''}>Male</option>
+                            <option ${patient && patient.gender === 'Female' ? 'selected' : ''}>Female</option>
+                            <option ${patient && patient.gender === 'Other' ? 'selected' : ''}>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Age</label>
+                        <input type="number" id="patAge" placeholder="e.g., 30"
+                               value="${patient && patient.age ? patient.age : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Appointment Date <span style="color:#d32f2f;">*</span></label>
+                        <input type="date" id="appointmentDate" required>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label>Select Time Slot <span style="color:#d32f2f;">*</span></label>
+                    <div class="time-grid" id="timeGrid">
+                        ${slots.map(s => `
+                            <button type="button" class="time-slot ${s === selectedSlot ? 'selected' : ''}" data-slot="${s}">${s}</button>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label>Reason for Visit (Optional)</label>
+                    <textarea id="reason" rows="3" placeholder="Briefly describe your symptoms..."></textarea>
+                </div>
+
+                <button type="button" class="btn-primary" id="confirmBtn" style="width:100%; padding:14px; font-size:15px; cursor:pointer;" ${!token ? 'disabled' : ''}>
+                    ${token ? `Confirm Appointment - Rs. ${doctor.fee}` : 'Login Required to Confirm'}
+                </button>
+            `;
+
+            // Date default: kal se 30 din tak
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 30);
+
+            const dateInput = document.getElementById('appointmentDate');
+            if (dateInput) {
+                dateInput.min = tomorrow.toISOString().split('T')[0];
+                dateInput.max = maxDate.toISOString().split('T')[0];
+                dateInput.value = tomorrow.toISOString().split('T')[0];
+            }
+
+            // Slot selection
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.addEventListener('click', function () {
+                    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedSlot = this.dataset.slot;
+                });
+            });
+
+            // Confirm button
+            const confirmBtn = document.getElementById('confirmBtn');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', confirmBooking);
+            }
+        }
+
+        // ===== CONFIRM BOOKING =====
+        async function confirmBooking() {
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const patientName = document.getElementById('patName').value.trim();
+            const patientPhone = document.getElementById('patPhone').value.trim();
+            const patientEmail = document.getElementById('patEmail').value.trim();
+            const patientAge = document.getElementById('patAge').value;
+            const patientGender = document.getElementById('patGender').value;
+            const appointmentDate = document.getElementById('appointmentDate').value;
+            const reason = document.getElementById('reason').value.trim();
+
+            if (!patientName || !patientPhone || !patientEmail || !appointmentDate || !selectedSlot) {
+                alert('Tamam required fields bharein aur time slot select karein.');
+                return;
+            }
+
+            const btn = document.getElementById('confirmBtn');
+            btn.disabled = true;
+            btn.textContent = 'Booking...';
+
+            try {
+                const res = await fetch(`${API}/appointment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        doctorId,
+                        appointmentDate,
+                        timeSlot: selectedSlot,
+                        reason,
+                        patientName,
+                        patientPhone,
+                        patientEmail,
+                        patientAge: patientAge ? Number(patientAge) : undefined,
+                        patientGender
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('bookingCard').style.display = 'none';
+                    document.querySelector('.booking-steps').style.display = 'none';
+                    document.getElementById('successScreen').style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert('❌ ' + data.message);
+                    btn.disabled = false;
+                    btn.textContent = `Confirm Appointment - Rs. ${doctor.fee}`;
+                }
+            } catch (err) {
+                alert('❌ Server se connect nahi ho pa raha.');
+                btn.disabled = false;
+                btn.textContent = `Confirm Appointment - Rs. ${doctor.fee}`;
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Profile | MedicalCare</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/doctors.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">MedicalCare</a>
+            <ul class="nav-links">
+                <li><a href="doctors.html" class="active">Find Doctors</a></li>
+                <li><a href="hospitals.html">Hospitals</a></li>
+                <li><a href="lab-tests.html">Lab Tests</a></li>
+                <li><a href="register.html">For Doctors</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="login.html" class="login-link">Login</a>
+                <a href="signup.html" class="btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="profile-page">
+        <!-- LEFT: Doctor Info -->
+        <div class="profile-main">
+
+            <!-- PROFILE HEADER -->
+            <div class="profile-header" id="profileHeaderCard">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading profile...
+                </div>
+            </div>
+
+            <!-- ABOUT -->
+            <div class="profile-section" id="aboutCard" style="display:none;">
+                <h2>About</h2>
+                <p id="aboutText"></p>
+            </div>
+
+            <!-- EDUCATION -->
+            <div class="profile-section" id="educationCard" style="display:none;">
+                <h2>Education</h2>
+                <ul id="eduList"></ul>
+            </div>
+
+            <!-- SERVICES -->
+            <div class="profile-section" id="servicesCard" style="display:none;">
+                <h2>Services</h2>
+                <div class="services-grid" id="servicesList"></div>
+            </div>
+
+            <!-- REVIEWS -->
+            <div class="profile-section">
+                <h2>Patient Reviews</h2>
+                <div id="reviewsContainer">
+                    <div class="loading">Loading reviews...</div>
+                </div>
+
+                <div class="add-review-box" id="addReviewBox" style="display:none;">
+                    <h4>✍️ Apna Review Likhain</h4>
+                    <div class="rating-stars" id="ratingStars">
+                        <span data-rating="1">★</span>
+                        <span data-rating="2">★</span>
+                        <span data-rating="3">★</span>
+                        <span data-rating="4">★</span>
+                        <span data-rating="5">★</span>
+                    </div>
+                    <textarea id="reviewComment" placeholder="Apna experience share karein..."></textarea>
+                    <button class="btn-submit-review" onclick="submitReview()">Submit Review</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Booking Box -->
+        <aside class="booking-box" id="bookingSidebar">
+            <div class="loading">Loading...</div>
+        </aside>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-col">
+                <h3>MedicalCare</h3>
+                <p>Pakistan's leading digital healthcare platform.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="doctors.html">Find Doctors</a></li>
+                    <li><a href="hospitals.html">Hospitals</a></li>
+                </ul>
+            </div>
+        </div>
+        <p class="footer-bottom">© 2026 MedicalCare.com. All rights reserved.</p>
+    </footer>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        const API = 'http://localhost:5000/api';
+        const doctorId = new URLSearchParams(window.location.search).get('id');
+        let currentDoctor = null;
+        let selectedRating = 0;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!doctorId) {
+                alert('Doctor ID missing in URL.');
+                window.location.href = 'doctors.html';
+                return;
+            }
+            loadDoctor();
+            loadReviews();
+        });
+
+        // ===== LOAD DOCTOR =====
+        async function loadDoctor() {
+            try {
+                const res = await fetch(`${API}/doctor/${doctorId}`);
+                const data = await res.json();
+
+                if (!data.success) throw new Error(data.message);
+
+                currentDoctor = data.data;
+                renderProfile(currentDoctor);
+                renderBookingSidebar(currentDoctor);
+
+            } catch (err) {
+                document.getElementById('profileHeaderCard').innerHTML =
+                    '<p style="color:#d32f2f; padding:20px;">Error: ' + err.message + '</p>';
+            }
+        }
+
+        // ===== RENDER PROFILE =====
+        function renderProfile(d) {
+            const initials = (d.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            const badge = d.isVerified
+                ? '<span class="verified-badge" style="font-size:11px; color:#16A34A; background:#E8F8EF; padding:3px 8px; border-radius:12px; font-weight:600;">✅ PMDC Verified</span>'
+                : '';
+
+            document.getElementById('profileHeaderCard').innerHTML = `
+                <div class="doctor-avatar-lg">${initials}</div>
+                <div>
+                    <h1>Dr. ${d.name} ${badge}</h1>
+                    <p class="specialty">${d.specialty}</p>
+                    <p class="meta">${d.licenseType || ''} • ${d.experience} years experience</p>
+                    <p class="hospital">🏥 ${d.hospital || ''}, ${d.city}</p>
+                    <div class="rating">⭐ ${d.rating || 0} (${d.totalReviews || 0} reviews)</div>
+                </div>
+            `;
+
+            // About - sirf tab show karein jab doctor ne bhara ho
+            if (d.about && d.about.trim().length > 0) {
+                document.getElementById('aboutText').textContent = d.about;
+                document.getElementById('aboutCard').style.display = 'block';
+            } else {
+                document.getElementById('aboutCard').style.display = 'none';
+            }
+
+            // Education - sirf asli education
+            if (Array.isArray(d.education) && d.education.length > 0) {
+                document.getElementById('eduList').innerHTML = d.education.map(e =>
+                    `<li>${e}</li>`
+                ).join('');
+                document.getElementById('educationCard').style.display = 'block';
+            } else {
+                document.getElementById('educationCard').style.display = 'none';
+            }
+
+            // Services - sirf asli services
+            if (Array.isArray(d.services) && d.services.length > 0) {
+                document.getElementById('servicesList').innerHTML = d.services.map(s =>
+                    `<span>${s}</span>`
+                ).join('');
+                document.getElementById('servicesCard').style.display = 'block';
+            } else {
+                document.getElementById('servicesCard').style.display = 'none';
+            }
+        }
+
+        // ===== RENDER BOOKING SIDEBAR =====
+        function renderBookingSidebar(d) {
+            const slots = Array.isArray(d.availableSlots) ? d.availableSlots : [];
+
+            let slotsHTML = '';
+            if (slots.length === 0) {
+                slotsHTML = `<p style="font-size:13px; color:#8a8a8a; padding:12px; background:#F7F9FC; border-radius:8px;">Is doctor ne abhi tak apni available timings set nahi ki. Baraye meharbani baad mein koshish karein ya clinic se rabta karein.</p>`;
+            } else {
+                slotsHTML = `<div class="timing-slots" id="timingSlots">
+                    ${slots.map(s => `<button class="slot" data-slot="${s}">${s}</button>`).join('')}
+                </div>`;
+            }
+
+            document.getElementById('bookingSidebar').innerHTML = `
+                <div class="fee-box">
+                    <p>Consultation Fee</p>
+                    <h2>Rs. ${d.fee}</h2>
+                </div>
+                <h3>Available Timings</h3>
+                ${slotsHTML}
+                ${slots.length > 0 ? '<button class="btn-primary" id="bookNowBtn" style="width:100%; display:block; text-align:center; padding:12px; margin-top:20px; border:none; cursor:pointer;" disabled>Book Appointment</button>' : ''}
+                <div class="clinic-info">
+                    <h4>Clinic Address</h4>
+                    <p>${d.hospital || ''}<br>${d.city}</p>
+                </div>
+            `;
+
+            let selectedSlot = null;
+
+            document.querySelectorAll('.slot').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.slot').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedSlot = this.dataset.slot;
+                    const bookBtn = document.getElementById('bookNowBtn');
+                    if (bookBtn) bookBtn.disabled = false;
+                });
+            });
+
+            const bookBtn = document.getElementById('bookNowBtn');
+            if (bookBtn) {
+                bookBtn.addEventListener('click', () => {
+                    if (!selectedSlot) return;
+                    window.location.href = `booking.html?doctorId=${d._id}&slot=${encodeURIComponent(selectedSlot)}`;
+                });
+            }
+        }
+
+        // ===== LOAD REVIEWS =====
+        async function loadReviews() {
+            try {
+                const res = await fetch(`${API}/review/doctor/${doctorId}`);
+                const data = await res.json();
+                const reviews = data.data || [];
+
+                const container = document.getElementById('reviewsContainer');
+
+                if (reviews.length === 0) {
+                    container.innerHTML = '<p style="font-size:13.5px; color:#8a8a8a;">Abhi tak koi review nahi hai. Pehla review aap likhain!</p>';
+                } else {
+                    container.innerHTML = reviews.map(r => `
+                        <div class="review">
+                            <strong>${r.patientName}</strong> ${'⭐'.repeat(r.rating)}
+                            <p>${r.comment}</p>
+                        </div>
+                    `).join('');
+                }
+
+                // Add review box dikhayein agar patient logged in hai
+                const token = localStorage.getItem('patientToken');
+                if (token) {
+                    document.getElementById('addReviewBox').style.display = 'block';
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('reviewsContainer').innerHTML =
+                    '<p style="font-size:13.5px; color:#8a8a8a;">Reviews load nahi ho sake.</p>';
+            }
+        }
+
+        // ===== RATING STARS =====
+        document.querySelectorAll('#ratingStars span').forEach(star => {
+            star.addEventListener('click', function () {
+                selectedRating = Number(this.dataset.rating);
+                document.querySelectorAll('#ratingStars span').forEach(s => {
+                    s.classList.toggle('active', Number(s.dataset.rating) <= selectedRating);
+                });
+            });
+        });
+
+        // ===== SUBMIT REVIEW =====
+        async function submitReview() {
+            const token = localStorage.getItem('patientToken');
+            if (!token) {
+                alert('Review likhne ke liye login karein.');
+                window.location.href = 'login.html';
+                return;
+            }
+            if (selectedRating === 0) {
+                alert('Pehle rating select karein.');
+                return;
+            }
+            const comment = document.getElementById('reviewComment').value.trim();
+            if (!comment) {
+                alert('Comment likhna zaroori hai.');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API}/review`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        doctorId,
+                        rating: selectedRating,
+                        comment
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('✅ Review add ho gaya!');
+                    document.getElementById('reviewComment').value = '';
+                    selectedRating = 0;
+                    document.querySelectorAll('#ratingStars span').forEach(s => s.classList.remove('active'));
+                    loadReviews();
+                    loadDoctor();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (err) {
+                alert('❌ Server error');
+            }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | MedicalCare</title>
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="dash-wrapper">
+
+        <!-- SIDEBAR -->
+        <aside class="dash-sidebar">
+
+            <a href="index.html" class="dash-logo">
+                MedicalCare ADMIN
+            </a>
+
+            <ul class="dash-menu">
+
+                <li>
+                    <a href="#" data-tab="pending">
+                        <span class="menu-icon">⏳</span>
+                        <span>Pending Doctors</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" data-tab="approved" class="active">
+                        <span class="menu-icon">✅</span>
+                        <span>Approved Doctors</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" data-tab="rejected">
+                        <span class="menu-icon">❌</span>
+                        <span>Rejected</span>
+                    </a>
+                </li>
+
+            </ul>
+
+        </aside>
+
+
+        <!-- MAIN -->
+        <main class="dash-main">
+
+            <div class="dash-header">
+
+                <div>
+                    <h1 id="pageTitle">
+                        Approved Doctors
+                    </h1>
+
+                    <p>
+                        Approve ya reject karein doctors ki applications
+                    </p>
+                </div>
+
+                <div class="user-info">
+
+                    <div class="user-avatar">
+                        AD
+                    </div>
+
+                    <div class="user-details">
+                        <strong>Admin</strong>
+                        <span>MedicalCare Management</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATS -->
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div class="stat-info">
+                        <h3 id="statPending">0</h3>
+                        <p>Pending</p>
+                    </div>
+
+                    <div class="stat-icon icon-yellow">
+                        ⏳
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-info">
+                        <h3 id="statApproved">0</h3>
+                        <p>Approved</p>
+                    </div>
+
+                    <div class="stat-icon icon-green">
+                        ✅
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-info">
+                        <h3 id="statRejected">0</h3>
+                        <p>Rejected</p>
+                    </div>
+
+                    <div class="stat-icon icon-pink">
+                        ❌
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TABLE -->
+            <div class="content-box">
+
+                <h2 id="tableTitle">
+                    Approved Doctors
+                </h2>
+
+                <div class="table-wrap">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>CNIC</th>
+                                <th>Specialty</th>
+                                <th>City</th>
+                                <th>Status</th>
+                                <th>Documents</th>
+                                <th>Action</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="doctorsBody">
+
+                            <tr>
+                                <td colspan="8" class="loading">
+                                    Loading...
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <script>
+
+        // =====================================
+        // API + ADMIN KEY
+        // =====================================
+
+        const API = 'http://localhost:5000/api';
+
+        const ADMIN_KEY = 'MedicalCare_admin_secure_key_2026_change_this_later';
+
+
+        // Helper: common headers for admin requests
+        function adminHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'x-admin-key': ADMIN_KEY
+            };
+        }
+
+
+        let currentTab = 'approved';
+
+        let allDoctors = [];
+
+
+        // =====================================
+        // PAGE LOAD
+        // =====================================
+
+        window.addEventListener('DOMContentLoaded', () => {
+
+            loadAllDoctors();
+
+        });
+
+
+        // =====================================
+        // LOAD ALL DOCTORS
+        // =====================================
+
+        async function loadAllDoctors() {
+
+            try {
+
+                const res = await fetch(
+                    `${API}/doctor/admin/all`,
+                    {
+                        method: 'GET',
+                        headers: adminHeaders()
+                    }
+                );
+
+
+                const data = await res.json();
+
+
+                console.log(
+                    'Admin doctors response:',
+                    data
+                );
+
+
+                if (!res.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        'Doctors load nahi hue.'
+                    );
+
+                }
+
+
+                if (!data.success) {
+
+                    throw new Error(
+                        data.message ||
+                        'Doctors load nahi hue.'
+                    );
+
+                }
+
+
+                allDoctors = data.data || [];
+
+
+                /*
+                    Backend se agar status lowercase aaye:
+                    pending
+                    approved
+                    rejected
+
+                    to hum display ke liye normalize karenge.
+                */
+
+                allDoctors = allDoctors.map(d => {
+
+                    let status =
+                        d.status || 'Pending';
+
+
+                    status =
+                        status.charAt(0).toUpperCase() +
+                        status.slice(1).toLowerCase();
+
+
+                    return {
+                        ...d,
+                        status: status
+                    };
+
+                });
+
+
+                updateStats();
+
+                renderTable();
+
+            }
+
+            catch (err) {
+
+                console.error(
+                    'Admin load error:',
+                    err
+                );
+
+
+                document.getElementById(
+                    'doctorsBody'
+                ).innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="8"
+                            style="
+                                text-align:center;
+                                padding:30px;
+                                color:#d32f2f;
+                            "
+                        >
+
+                            ${err.message ||
+                    'Server se connect nahi ho pa raha.'}
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        }
+
+
+        // =====================================
+        // UPDATE STATS
+        // =====================================
+
+        function updateStats() {
+
+            const pending =
+                allDoctors.filter(
+                    d =>
+                        d.status.toLowerCase() ===
+                        'pending'
+                );
+
+
+            const approved =
+                allDoctors.filter(
+                    d =>
+                        d.status.toLowerCase() ===
+                        'approved'
+                );
+
+
+            const rejected =
+                allDoctors.filter(
+                    d =>
+                        d.status.toLowerCase() ===
+                        'rejected'
+                );
+
+
+            document.getElementById(
+                'statPending'
+            ).textContent = pending.length;
+
+
+            document.getElementById(
+                'statApproved'
+            ).textContent = approved.length;
+
+
+            document.getElementById(
+                'statRejected'
+            ).textContent = rejected.length;
+
+        }
+
+
+        // =====================================
+        // RENDER TABLE
+        // =====================================
+
+        function renderTable() {
+
+            const filtered =
+                allDoctors.filter(
+                    d =>
+                        d.status.toLowerCase() ===
+                        currentTab
+                );
+
+
+            const body =
+                document.getElementById(
+                    'doctorsBody'
+                );
+
+
+            if (filtered.length === 0) {
+
+                body.innerHTML = `
+
+                    <tr>
+
+                        <td colspan="8">
+
+                            <div class="empty-state">
+
+                                <div class="empty-icon">
+                                    📋
+                                </div>
+
+                                <h3>
+                                    Koi doctor nahi mila
+                                </h3>
+
+                                <p>
+                                    Is section mein filhal koi record nahi hai.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+            body.innerHTML =
+                filtered.map(d => `
+
+                    <tr>
+
+                        <td>
+                            <strong>
+                                ${escapeHtml(d.name || '-')}
+                            </strong>
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(d.email || '-')}
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(d.cnic || '-')}
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(d.specialty || '-')}
+                        </td>
+
+
+                        <td>
+                            ${escapeHtml(d.city || '-')}
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="badge badge-${d.status.toLowerCase()}"
+                            >
+
+                                ${escapeHtml(d.status)}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            ${d.licenseFile
+                        ?
+                        `
+                                    <a
+                                        href="http://localhost:5000/uploads/${encodeURIComponent(d.licenseFile)}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style="
+                                            color:#004182;
+                                            font-size:12.5px;
+                                        "
+                                    >
+                                        License
+                                    </a>
+                                `
+                        :
+                        '-'
+                    }
+
+
+                            ${d.cnicFile
+                        ?
+                        `
+                                    |
+
+                                    <a
+                                        href="http://localhost:5000/uploads/${encodeURIComponent(d.cnicFile)}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style="
+                                            color:#004182;
+                                            font-size:12.5px;
+                                        "
+                                    >
+                                        CNIC
+                                    </a>
+                                `
+                        :
+                        ''
+                    }
+
+                        </td>
+
+
+                        <td class="actions">
+
+                            ${d.status === 'Pending'
+                        ?
+                        `
+
+                                    <button
+                                        class="btn-sm btn-approve"
+                                        onclick="approveDoctor('${d._id}')"
+                                    >
+                                        Approve
+                                    </button>
+
+
+                                    <button
+                                        class="btn-sm btn-reject"
+                                        onclick="rejectDoctor('${d._id}')"
+                                    >
+                                        Reject
+                                    </button>
+
+                                `
+
+                        :
+
+                        d.status === 'Approved'
+                            ?
+
+                            `
+
+                                    <button
+                                        class="btn-sm btn-reject"
+                                        onclick="rejectDoctor('${d._id}')"
+                                    >
+                                        Reject
+                                    </button>
+
+                                `
+
+                            :
+
+                            `
+
+                                    <button
+                                        class="btn-sm btn-approve"
+                                        onclick="approveDoctor('${d._id}')"
+                                    >
+                                        Approve
+                                    </button>
+
+                                `
+                    }
+
+                        </td>
+
+                    </tr>
+
+                `).join('');
+
+        }
+
+
+        // =====================================
+        // APPROVE DOCTOR
+        // =====================================
+
+        async function approveDoctor(id) {
+
+            if (
+                !confirm(
+                    'Kya aap is doctor ko approve karna chahte hain?'
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            try {
+
+                const res =
+                    await fetch(
+                        `${API}/doctor/${id}/approve`,
+                        {
+                            method: 'PUT',
+                            headers: adminHeaders()
+                        }
+                    );
+
+
+                const data =
+                    await res.json();
+
+
+                console.log(
+                    'Approve response:',
+                    data
+                );
+
+
+                if (!res.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        'Doctor approve nahi hua.'
+                    );
+
+                }
+
+
+                if (data.success) {
+
+                    alert(
+                        '✅ Doctor approved successfully!'
+                    );
+
+
+                    await loadAllDoctors();
+
+                }
+
+                else {
+
+                    alert(
+                        '❌ ' +
+                        (
+                            data.message ||
+                            'Doctor approve nahi hua.'
+                        )
+                    );
+
+                }
+
+            }
+
+            catch (err) {
+
+                console.error(
+                    'Approve error:',
+                    err
+                );
+
+
+                alert(
+                    '❌ ' +
+                    (
+                        err.message ||
+                        'Server error'
+                    )
+                );
+
+            }
+
+        }
+
+
+        // =====================================
+        // REJECT DOCTOR
+        // =====================================
+
+        async function rejectDoctor(id) {
+
+            if (
+                !confirm(
+                    'Kya aap is doctor ko reject karna chahte hain?'
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            try {
+
+                const res =
+                    await fetch(
+                        `${API}/doctor/${id}/reject`,
+                        {
+                            method: 'PUT',
+                            headers: adminHeaders()
+                        }
+                    );
+
+
+                const data =
+                    await res.json();
+
+
+                console.log(
+                    'Reject response:',
+                    data
+                );
+
+
+                if (!res.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        'Doctor reject nahi hua.'
+                    );
+
+                }
+
+
+                if (data.success) {
+
+                    alert(
+                        '✅ Doctor rejected.'
+                    );
+
+
+                    await loadAllDoctors();
+
+                }
+
+                else {
+
+                    alert(
+                        '❌ ' +
+                        (
+                            data.message ||
+                            'Doctor reject nahi hua.'
+                        )
+                    );
+
+                }
+
+            }
+
+            catch (err) {
+
+                console.error(
+                    'Reject error:',
+                    err
+                );
+
+
+                alert(
+                    '❌ ' +
+                    (
+                        err.message ||
+                        'Server error'
+                    )
+                );
+
+            }
+
+        }
+
+
+        // =====================================
+        // TABS
+        // =====================================
+
+        document
+            .querySelectorAll(
+                '.dash-menu a'
+            )
+            .forEach(link => {
+
+                link.addEventListener(
+                    'click',
+                    (e) => {
+
+                        e.preventDefault();
+
+
+                        const tab =
+                            link.dataset.tab;
+
+
+                        if (!tab) {
+
+                            return;
+
+                        }
+
+
+                        document
+                            .querySelectorAll(
+                                '.dash-menu a'
+                            )
+                            .forEach(a => {
+
+                                a.classList.remove(
+                                    'active'
+                                );
+
+                            });
+
+
+                        link.classList.add(
+                            'active'
+                        );
+
+
+                        currentTab = tab;
+
+
+                        renderTable();
+
+
+                        const titles = {
+
+                            pending:
+                                'Pending Doctors',
+
+                            approved:
+                                'Approved Doctors',
+
+                            rejected:
+                                'Rejected Doctors'
+
+                        };
+
+
+                        document.getElementById(
+                            'pageTitle'
+                        ).textContent =
+                            titles[tab];
+
+
+                        document.getElementById(
+                            'tableTitle'
+                        ).textContent =
+                            titles[tab];
+
+                    }
+                );
+
+            });
+
+
+        // =====================================
+        // BASIC HTML ESCAPE
+        // =====================================
+
+        function escapeHtml(value) {
+
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+        }
+
+    </script>
+
+</body>
+
+</html>

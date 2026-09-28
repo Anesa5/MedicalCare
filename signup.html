@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sign Up | MedicalCare</title>
+
+    <link rel="stylesheet" href="css/common.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--lavender-color, #f4f5ff);
+            padding: 30px 15px;
+        }
+
+        .auth-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 82, 0.08);
+            max-width: 480px;
+            width: 100%;
+        }
+
+        .auth-card h1 {
+            font-size: 24px;
+            color: var(--primary-dark-color, #000052);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .auth-card p.sub {
+            text-align: center;
+            color: var(--muted-color, #6b7280);
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13.6px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #222;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13.6px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #004182;
+            box-shadow: 0 0 0 3px rgba(0, 65, 130, 0.08);
+        }
+
+        .hint {
+            display: block;
+            font-size: 11px;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .error-message {
+            display: none;
+            background: #fff1f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 11px 13px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .success-message {
+            display: none;
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+            padding: 11px 13px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #004182;
+            color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #002f63;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13.6px;
+            color: #6b7280;
+        }
+
+        .link a {
+            color: #004182;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .link a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 520px) {
+            .auth-card {
+                padding: 28px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-page">
+
+        <div class="auth-card">
+
+            <h1>Create Account</h1>
+
+            <p class="sub">
+                Sign up to book appointments online
+            </p>
+
+            <div id="errorMessage" class="error-message">
+            </div>
+
+            <div id="successMessage" class="success-message">
+            </div>
+
+            <form id="signupForm">
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Full Name
+                    </label>
+
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" autocomplete="name"
+                        required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="phone">
+                        Phone Number
+                    </label>
+
+                    <input type="tel" id="phone" name="phone" placeholder="03XXXXXXXXX" autocomplete="tel"
+                        maxlength="11" required>
+
+                    <span class="hint">
+                        Example: 03001234567
+                    </span>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email
+                    </label>
+
+                    <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email"
+                        required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="city">
+                        City
+                    </label>
+
+                    <select id="city" name="city" required>
+
+                        <option value="">
+                            Select City
+                        </option>
+
+                        <option value="Karachi">
+                            Karachi
+                        </option>
+
+                        <option value="Lahore">
+                            Lahore
+                        </option>
+
+                        <option value="Islamabad">
+                            Islamabad
+                        </option>
+
+                        <option value="Rawalpindi">
+                            Rawalpindi
+                        </option>
+
+                        <option value="Faisalabad">
+                            Faisalabad
+                        </option>
+
+                        <option value="Multan">
+                            Multan
+                        </option>
+
+                        <option value="Peshawar">
+                            Peshawar
+                        </option>
+
+                        <option value="Quetta">
+                            Quetta
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input type="password" id="password" name="password" placeholder="Min 8 characters"
+                        autocomplete="new-password" required>
+
+                    <span class="hint">
+                        Capital letter, small letter, number aur special character use karein.
+                    </span>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="confirmPassword">
+                        Confirm Password
+                    </label>
+
+                    <input type="password" id="confirmPassword" placeholder="Re-enter password"
+                        autocomplete="new-password" required>
+
+                </div>
+
+
+                <button type="submit" class="btn-primary" id="signupBtn">
+
+                    Sign Up
+
+                </button>
+
+
+                <p class="link">
+
+                    Already have an account?
+
+                    <a href="login.html">
+                        Login
+                    </a>
+
+                </p>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        const signupForm =
+            document.getElementById('signupForm');
+
+        const signupBtn =
+            document.getElementById('signupBtn');
+
+        const errorMessage =
+            document.getElementById('errorMessage');
+
+        const successMessage =
+            document.getElementById('successMessage');
+
+
+        function showError(message) {
+
+            successMessage.style.display = 'none';
+
+            errorMessage.textContent = message;
+
+            errorMessage.style.display = 'block';
+
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+
+        function showSuccess(message) {
+
+            errorMessage.style.display = 'none';
+
+            successMessage.textContent = message;
+
+            successMessage.style.display = 'block';
+        }
+
+
+        signupForm.addEventListener(
+            'submit',
+            async function (event) {
+
+                event.preventDefault();
+
+
+                errorMessage.style.display = 'none';
+
+                successMessage.style.display = 'none';
+
+
+                const name =
+                    document
+                        .getElementById('name')
+                        .value
+                        .trim();
+
+
+                let phone =
+                    document
+                        .getElementById('phone')
+                        .value
+                        .trim();
+
+
+                const email =
+                    document
+                        .getElementById('email')
+                        .value
+                        .trim()
+                        .toLowerCase();
+
+
+                const city =
+                    document
+                        .getElementById('city')
+                        .value;
+
+
+                const password =
+                    document
+                        .getElementById('password')
+                        .value;
+
+
+                const confirmPassword =
+                    document
+                        .getElementById('confirmPassword')
+                        .value;
+
+
+                // Remove spaces and dashes from phone
+                phone = phone.replace(/[\s-]/g, '');
+
+
+                // ================================
+                // Name validation
+                // ================================
+
+                if (name.length < 3) {
+
+                    showError(
+                        'Full name kam se kam 3 characters ka hona chahiye.'
+                    );
+
+                    return;
+                }
+
+
+                // ================================
+                // Pakistani phone validation
+                // ================================
+
+                const phoneRegex = /^03\d{9}$/;
+
+                if (!phoneRegex.test(phone)) {
+
+                    showError(
+                        'Phone number sahi format mein enter karein. Example: 03001234567'
+                    );
+
+                    return;
+                }
+
+
+                // ================================
+                // Password validation
+                // ================================
+
+                if (password !== confirmPassword) {
+
+                    showError(
+                        'Password aur Confirm Password match nahi kar rahe.'
+                    );
+
+                    return;
+                }
+
+
+                const passwordRegex =
+                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#]).{8,}$/;
+
+
+                if (!passwordRegex.test(password)) {
+
+                    showError(
+                        'Password minimum 8 characters ka ho aur us mein 1 capital letter, 1 small letter, 1 number aur 1 special character hona chahiye.'
+                    );
+
+                    return;
+                }
+
+
+                // ================================
+                // Disable button
+                // ================================
+
+                const originalButtonText =
+                    signupBtn.textContent;
+
+
+                signupBtn.disabled = true;
+
+                signupBtn.textContent =
+                    'Creating Account...';
+
+
+                try {
+
+                    /*
+                        Agar frontend Live Server:
+                        http://127.0.0.1:5501
+
+                        par chal raha hai to localhost:5000 use hoga.
+
+                        Agar frontend Express backend se
+                        port 5000 par serve ho raha hai to
+                        relative backend bhi work karega.
+                    */
+
+                    const API_BASE =
+                        window.location.port === '5000'
+                            ? ''
+                            : 'http://localhost:5000';
+
+
+                    const response =
+                        await fetch(
+                            `${API_BASE}/api/patient/register`,
+                            {
+                                method: 'POST',
+
+                                headers: {
+                                    'Content-Type':
+                                        'application/json'
+                                },
+
+                                body: JSON.stringify({
+                                    name: name,
+                                    phone: phone,
+                                    email: email,
+                                    city: city,
+                                    password: password
+                                })
+                            }
+                        );
+
+
+                    /*
+                        Kabhi backend HTML ya empty response
+                        bhej de to direct response.json()
+                        error deta hai.
+
+                        Isliye pehle text read kar rahe hain.
+                    */
+
+                    const responseText =
+                        await response.text();
+
+
+                    let data;
+
+
+                    try {
+
+                        data = JSON.parse(responseText);
+
+                    } catch {
+
+                        throw new Error(
+                            'Backend ne valid JSON response nahi diya.'
+                        );
+
+                    }
+
+
+                    console.log(
+                        'Patient registration response:',
+                        data
+                    );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.message ||
+                            'Registration failed.'
+                        );
+                    }
+
+
+                    if (data.success === false) {
+
+                        throw new Error(
+                            data.message ||
+                            'Account create nahi hua.'
+                        );
+                    }
+
+
+                    showSuccess(
+                        'Account successfully create ho gaya. Login page open ho raha hai...'
+                    );
+
+
+                    /*
+                        Agar backend registration ke waqt
+                        token return karta hai to save kar dein.
+                    */
+
+                    if (data.token) {
+
+                        localStorage.setItem(
+                            'patientToken',
+                            data.token
+                        );
+
+                    }
+
+
+                    setTimeout(function () {
+
+                        window.location.href =
+                            'login.html';
+
+                    }, 1200);
+
+
+                } catch (error) {
+
+                    console.error(
+                        'Signup Error:',
+                        error
+                    );
+
+
+                    if (
+                        error.message.includes(
+                            'Failed to fetch'
+                        )
+                    ) {
+
+                        showError(
+                            'Backend server se connection nahi ho raha. Check karein ke server http://localhost:5000 par chal raha hai.'
+                        );
+
+                    } else {
+
+                        showError(
+                            error.message ||
+                            'Registration ke waqt error aa gaya.'
+                        );
+
+                    }
+
+                } finally {
+
+                    signupBtn.disabled = false;
+
+                    signupBtn.textContent =
+                        originalButtonText;
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
